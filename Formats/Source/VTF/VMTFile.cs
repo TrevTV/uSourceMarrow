@@ -124,7 +124,7 @@ namespace uSource.Formats.Source.VTF
                 }
 #endif
 
-                Material = DefaultMaterial = new Material(Shader.Find("Diffuse"));
+                Material = DefaultMaterial = new Material(Shader.Find("SLZ/LitMAS/LitMAS Standard"));
                 Material.name = FileName;
 #if UNITY_EDITOR
                 if (uLoader.SaveAssetsToUnity)
@@ -203,7 +203,7 @@ namespace uSource.Formats.Source.VTF
                 if (TextureName == null || TextureName.Length == 0)
                     TextureName = GetParam("$envmapmask");
 
-                BaseTexture = uResourceManager.LoadTexture(TextureName, ExportData: new String[,] { { FileName, "_MainTex" } })[0, 0];
+                BaseTexture = uResourceManager.LoadTexture(TextureName, ExportData: new String[,] { { FileName, "_BaseMap" } })[0, 0];
 
                 //To avoid "NullReferenceException"
                 //Temp fix before big update
@@ -218,7 +218,12 @@ namespace uSource.Formats.Source.VTF
             Material.color = GetColor();
 
             if (BaseTexture != null)
-                Material.mainTexture = BaseTexture;
+            {
+                if (Material.HasProperty("_MainTex"))
+                    Material.SetTexture("_MainTex", BaseTexture);
+                if (Material.HasProperty("_BaseMap"))
+                    Material.SetTexture("_BaseMap", BaseTexture);
+            }
 
             if (ContainsParam("$basetexture2"))
             {
@@ -283,11 +288,48 @@ namespace uSource.Formats.Source.VTF
                         if (ContainsParam("$detailblendmode"))
                             Material.SetInt("_DetailBlendMode", GetInteger("$detailblendmode"));
                     }
+
+                    Material.SetFloat("_Details", 1f);
                 }
             }
 
             if (ContainsParam("$surfaceprop"))
                 SurfaceProp = GetParam("$surfaceprop");
+
+            if (ContainsParam("$selfillummask"))
+            {
+                PropertyName = "_EmissionMap";
+                if (Material.HasProperty(PropertyName))
+                {
+                    TextureName = GetParam("$selfillummask");
+                    Material.SetTexture(PropertyName, uResourceManager.LoadTexture(TextureName, ExportData: new String[,] { { FileName, PropertyName } })[0, 0]);
+                    Material.EnableKeyword("_EMISSION");
+                    Material.SetFloat("_Emission", 1f);
+                }
+            }
+
+            if (ContainsParam("$selfillumtint"))
+            {
+                PropertyName = "_EmissionColor";
+                if (Material.HasProperty(PropertyName))
+                {
+                    var colorVector = GetVector3("$selfillumtint", true);
+                    Material.SetColor(PropertyName, new Color(colorVector.x, colorVector.y, colorVector.z));
+                    Material.SetFloat("_Emission", 1f);
+                    Material.EnableKeyword("_EMISSION");
+                }
+            }
+
+            if (ContainsParam("$bumpmap"))
+            {
+                PropertyName = "_BumpMap";
+                if (Material.HasProperty(PropertyName))
+                {
+                    TextureName = GetParam("$bumpmap");
+                    Material.SetTexture(PropertyName, uResourceManager.LoadTexture(TextureName, ExportData: new String[,] { { FileName, PropertyName } })[0, 0]);
+                    Material.SetFloat("_Normals", 1f);
+                }
+            }
         }
 
         public Shader GetShader(String shader, Boolean HasAlpha = false)

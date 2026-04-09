@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Rendering;
 using uSource.Decals;
 using uSource.Formats.Source.VTF;
 using uSource.MathLib;
@@ -208,7 +209,7 @@ namespace uSource.Formats.Source.VBSP
                 DecalBuilder.Offset = 0.001f;
                 DecalBuilder.Sprite = DecalTexture;
                 DecalBuilder.Material = DecalMaterial.Material;
-                DecalBuilder.Material.SetTextureScale("_MainTex", new Vector2(-1, 1));
+                DecalBuilder.Material.SetTextureScale("_BaseMap", new Vector2(-1, 1));
 
                 Single ScaleX = (DecalWidth * DecalScale) * uLoader.UnitScale;
                 Single ScaleY = (DecalHeight * DecalScale) * uLoader.UnitScale;

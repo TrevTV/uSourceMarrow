@@ -12,13 +12,13 @@ namespace uSource.Formats.Source.VBSP
 
         void OnDrawGizmos()
         {
-            Gizmos.DrawCube(transform.position, Vector3.one / 5f);
+            Gizmos.DrawCube(transform.position, Vector3.one / 10f);
         }
 
         void OnDrawGizmosSelected()
         {
             Gizmos.color = Color.red;
-            Gizmos.DrawCube(transform.position, Vector3.one / 5f);
+            Gizmos.DrawCube(transform.position, Vector3.one / 10f);
         }
 
         public void Configure(List<String> Data)

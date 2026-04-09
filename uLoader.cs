@@ -541,7 +541,7 @@ namespace uSource
         public static Single SubstractLODPrecent = 0.25f;
         #endregion
         public const float inchesInMeters = 1f / 32;
-        public static Single UnitScale = inchesInMeters;
+        public static Single UnitScale = 0.0265304375f;
         public static Boolean LoadAnims = false;
         public static Boolean ClearDirectoryCache = false;
         public static Boolean ClearModelCache = true;
@@ -607,16 +607,16 @@ namespace uSource
         public static String DetailTranslucentShader = "USource/TranslucentGeneric";
         //Translucent
         public static String TranslucentShader = "USource/TranslucentGeneric";
-        public static String TranslucentUnlitShader = "Unlit/Transparent";
+        public static String TranslucentUnlitShader = "Mabel/LitMAS Plus/LitMAS+ Alpha Clip";
         //AlphaTest (Cutout)
         public static String AlphaTestShader = "USource/CutoutGeneric";
         //SelfIllum
-        public static String SelfIllumShader = "USource/IllumGeneric";
+        public static String SelfIllumShader = "SLZ/LitMAS/LitMAS Standard";
         //Global
-        public static String DefaultShader = "Diffuse";
-        public static String LightmappedGenericShader = "Diffuse";
-        public static String VertexLitGenericShader = "Diffuse";
-        public static String WorldVertexTransitionShader = "USource/Lightmapped/WorldVertexTransition";
+        public static String DefaultShader = "SLZ/LitMAS/LitMAS Standard";
+        public static String LightmappedGenericShader = "SLZ/LitMAS/LitMAS Standard";
+        public static String VertexLitGenericShader = "SLZ/LitMAS/LitMAS Standard";
+        public static String WorldVertexTransitionShader = "Shader Graphs/WorldVertexTransition";
         public static String WorldTwoTextureBlend = "USource/Lightmapped/WorldTwoTextureBlend";
         public static String UnlitGeneric = "USource/UnlitGeneric";
         #endregion
@@ -1025,15 +1025,15 @@ namespace uSource
             DetailTranslucentShader = "USource/TranslucentGeneric";
             //Translucent
             TranslucentShader = "USource/TranslucentGeneric";
-            TranslucentUnlitShader = "Unlit/Transparent";
+            TranslucentUnlitShader = "Mabel/LitMAS Plus/LitMAS+ Alpha Clip";
             //AlphaTest (Cutout)
             AlphaTestShader = "USource/CutoutGeneric";
             //SelfIllum
-            SelfIllumShader = "USource/IllumGeneric";
+            SelfIllumShader = "SLZ/LitMAS/LitMAS Standard";
             //Global
-            DefaultShader = "Diffuse";
-            LightmappedGenericShader = "Diffuse";
-            VertexLitGenericShader = "Diffuse";
+            DefaultShader = "SLZ/LitMAS/LitMAS Standard";
+            LightmappedGenericShader = "SLZ/LitMAS/LitMAS Standard";
+            VertexLitGenericShader = "SLZ/LitMAS/LitMAS Standard";
             WorldVertexTransitionShader = "USource/Lightmapped/WorldVertexTransition";
             WorldTwoTextureBlend = "USource/Lightmapped/WorldTwoTextureBlend";
             UnlitGeneric = "USource/UnlitGeneric";

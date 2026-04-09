@@ -369,7 +369,7 @@ namespace uSource.Formats.Source.VBSP
                 {
                     InitPAKLump();
 
-                    CreateSkybox(Data);
+                    //CreateSkybox(Data);
 
                     CreateFaces();
                     CreateModels();
@@ -400,6 +400,9 @@ namespace uSource.Formats.Source.VBSP
                         EntityObject.gameObject.AddComponent<EntInfo>().Configure(Data);
                     else
                         EntityObject.Configure(Data);
+
+                    if (Data[6] == "StartDisabled")
+                        EntityObject.gameObject.SetActive(false);
                 }
             }
         }

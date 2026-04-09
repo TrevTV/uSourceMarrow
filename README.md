@@ -1,6 +1,8 @@
 # uSource
 uSource is a plugin for importing MDL / BSP / VMT / VTF and etc... resources to Unity!
 
+## Requires [Mabel's Shaders](https://github.com/FragileDeviations/MabelsShaders.git) to be installed in your Unity project.
+
 ![Screenshot](Pic1.png)
 
 # Supported formats (1.1 Beta):
