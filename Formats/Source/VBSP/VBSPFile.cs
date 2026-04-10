@@ -19,6 +19,9 @@ namespace uSource.Formats.Source.VBSP
         static dface_t[] BSP_Faces;
         static dmodel_t[] BSP_Models;
 
+        static dleaf_t[]  BSP_Leaves;
+        static dleafface_t[] BSP_LeafFaces;
+
         static doverlay_t[] BSP_Overlays;
 
         static ddispinfo_t[] BSP_DispInfo;
@@ -140,6 +143,15 @@ namespace uSource.Formats.Source.VBSP
 
             BSP_Surfedges = new Int32[BSP_Header.Lumps[13].FileLen / 4];
             BSPFileReader.ReadArrayFixed(ref BSP_Surfedges, 4, BSP_Header.Lumps[13].FileOfs);
+
+            // LUMP_LEAFS = 10, sizeof dleaf_t = 32
+            BSP_Leaves = new dleaf_t[BSP_Header.Lumps[10].FileLen / 32];
+            BSPFileReader.ReadArrayFixed(ref BSP_Leaves, 32, BSP_Header.Lumps[10].FileOfs);
+
+            // LUMP_LEAFFACES = 16, each entry is a UInt16
+            int leafFaceCount = BSP_Header.Lumps[16].FileLen / 2;
+            BSP_LeafFaces = new dleafface_t[BSP_Header.Lumps[16].FileLen / 2];
+            BSPFileReader.ReadArrayFixed(ref BSP_LeafFaces, 2, BSP_Header.Lumps[16].FileOfs);
 
             #region Lights
             var WorldLightLump = BSP_Header.Lumps[15].FileLen <= 0 ? BSP_Header.Lumps[54] : BSP_Header.Lumps[15];
@@ -372,7 +384,10 @@ namespace uSource.Formats.Source.VBSP
                     //CreateSkybox(Data);
 
                     CreateFaces();
-                    CreateModels();
+                    if (uLoader.ParseLeaves)
+                        CreateLeafMeshes();
+                    else
+                        CreateModels();
 
                     CreateDispFaces();
                     CreateDisplacements();
@@ -590,6 +605,118 @@ namespace uSource.Formats.Source.VBSP
                     //Mesh.RecalculateTangents();
                 }
 
+            }
+        }
+
+        static void CreateLeafMeshes()
+        {
+            if (BSP_CFaces == null)
+            {
+                Debug.LogError("CreateLeafMeshes: BSP_CFaces is null, call CreateFaces() first");
+                return;
+            }
+
+            HashSet<Int32> builtFaces = new HashSet<Int32>();
+
+            // Group faces by leaf
+            for (Int32 leafID = 0; leafID < BSP_Leaves.Length; leafID++)
+            {
+                dleaf_t leaf = BSP_Leaves[leafID];
+
+                // Skip empty leaves
+                if (leaf.NumLeafFaces == 0)
+                    continue;
+
+                // Collect all CFace data for this leaf, grouped by texture
+                Dictionary<Int32, List<Int32>> facesByTexture = new Dictionary<Int32, List<Int32>>();
+
+                for (Int32 i = 0; i < leaf.NumLeafFaces; i++)
+                {
+                    Int32 faceIdx = BSP_LeafFaces[leaf.FirstLeafFace + i].FaceIndex;
+                    dface_t dface = BSP_Faces[faceIdx];
+
+                    if (builtFaces.Contains(faceIdx)) continue;
+                    builtFaces.Add(faceIdx);
+
+                    // Skip displacements (handled separately) and sky/nodraw
+                    if (dface.DispInfo != -1) continue;
+
+                    Int32 texID = BSP_TexData[BSP_TexInfo[dface.TexInfo].TexData].NameStringTableID;
+
+                    if (!facesByTexture.ContainsKey(texID))
+                        facesByTexture[texID] = new List<Int32>();
+
+                    facesByTexture[texID].Add(faceIdx);
+                }
+
+                if (facesByTexture.Count == 0) continue;
+
+                // Create a parent GameObject for this leaf
+                GameObject leafObj = new GameObject("Leaf_" + leafID + "_Cluster_" + leaf.Cluster);
+                leafObj.transform.parent = FacesGroup;
+                leafObj.isStatic = true;
+
+                // One sub-mesh per texture within the leaf
+                foreach (var kvp in facesByTexture)
+                {
+                    Int32 texID = kvp.Key;
+                    String texName = BSP_TextureStringData[texID];
+
+                    List<Face>    faces     = new List<Face>();
+                    List<Vector3> vertices  = new List<Vector3>();
+                    List<Color32> colors    = new List<Color32>();
+                    List<Int32>   triangles = new List<Int32>();
+                    List<Vector2> uvs       = new List<Vector2>();
+
+                    foreach (Int32 fi in kvp.Value)
+                    {
+                        Face cf = BSP_CFaces[fi];
+                        Int32 offset = vertices.Count;
+                        foreach (Int32 t in cf.Triangles)
+                            triangles.Add(t + offset);
+                        vertices.AddRange(cf.Vertices);
+                        colors.AddRange(cf.Colors);
+                        uvs.AddRange(cf.UV);
+                        faces.Add(cf);
+                    }
+
+                    GameObject meshObj = new GameObject(texName);
+                    meshObj.transform.parent = leafObj.transform;
+                    meshObj.isStatic = true;
+
+                    Mesh mesh = meshObj.AddComponent<MeshFilter>().sharedMesh = new Mesh();
+                    mesh.name = texName + "_leaf" + leafID;
+                    mesh.SetVertices(vertices);
+                    mesh.SetTriangles(triangles, 0);
+                    mesh.SetColors(colors);
+                    mesh.SetUVs(0, uvs);
+                    mesh.RecalculateNormals();
+
+                    MeshRenderer mr = meshObj.AddComponent<MeshRenderer>();
+                    mr.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.TwoSided;
+                    mr.sharedMaterial = uResourceManager.LoadMaterial(texName).Material;
+
+                    if (texName.Contains("TOOLS/"))
+                    {
+                        mr.enabled = false;
+                        BSP_Brushes.Add(meshObj);
+                    }
+                    else if (!uLoader.ParseBSPPhysics)
+                    {
+                        meshObj.AddComponent<MeshCollider>();
+                    }
+
+                    // Lightmaps work exactly the same way as in CreateModels()
+                    if (uLoader.ParseLightmaps)
+                    {
+                        List<Vector2> uv2 = new List<Vector2>();
+                        Texture2D lightmap = new Texture2D(1, 1);
+                        CreateLightmap(faces, ref lightmap, ref uv2);
+                        mesh.SetUVs(1, uv2);
+                        if (uLoader.UseLightmapsAsTextureShader && mr.sharedMaterial != null)
+                            mr.sharedMaterial.SetTexture("_LightMap", lightmap);
+                    }
+                }
             }
         }
 

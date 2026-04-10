@@ -250,6 +250,7 @@ namespace uSource
                 {
                     uLoader.ParseBSPPhysics = EditorGUILayout.ToggleLeft("Parse physics (Unstable)", uLoader.ParseBSPPhysics);
                     uLoader.ParseStaticPropScale = EditorGUILayout.ToggleLeft("Parse static props scale (only for v11 & csgo)", uLoader.ParseStaticPropScale);
+                    uLoader.ParseLeaves = EditorGUILayout.ToggleLeft("Parse leaves (better for occulusion culling)", uLoader.ParseLeaves);
                     uLoader.Use3DSkybox = EditorGUILayout.ToggleLeft("Use 3D Skybox", uLoader.Use3DSkybox);
                     uLoader.ParseDecals = EditorGUILayout.ToggleLeft("Parse decals (Beta)", uLoader.ParseDecals);
                     uLoader.DebugEntities = EditorGUILayout.ToggleLeft("Debug entities", uLoader.DebugEntities);
@@ -555,6 +556,7 @@ namespace uSource
         public static String MapName = "test_angles";
         public static Boolean ParseBSPPhysics = false;
         public static Boolean ParseStaticPropScale = false;
+        public static Boolean ParseLeaves = true;
         public static Boolean Use3DSkybox = true;
         public static Boolean ParseDecals = false;
         public static Boolean UseGammaLighting = true;
@@ -775,6 +777,7 @@ namespace uSource
             MapName = PlayerPrefs.GetString("uMapName", MapName);
             ParseBSPPhysics = GetBool("uParseBSPPhysics", ParseBSPPhysics);
             ParseStaticPropScale = GetBool("uParseStaticPropScale", ParseStaticPropScale);
+            ParseLeaves = GetBool("uParseLeaves", ParseLeaves);
             Use3DSkybox = GetBool("uUse3DSkybox", Use3DSkybox);
             ParseDecals = GetBool("uParseDecals", ParseDecals);
             UseGammaLighting = GetBool("uUseGammaLighting", UseGammaLighting);
@@ -882,6 +885,7 @@ namespace uSource
             PlayerPrefs.SetString("uMapName", MapName);
             SetBool("uParseBSPPhysics", ParseBSPPhysics);
             SetBool("uParseStaticPropScale", ParseStaticPropScale);
+            SetBool("uParseLeaves", ParseLeaves);
             SetBool("uUse3DSkybox", Use3DSkybox);
             SetBool("uParseDecals", ParseDecals);
             SetBool("uUseGammaLighting", UseGammaLighting);

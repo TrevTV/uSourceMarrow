@@ -193,6 +193,9 @@ namespace uSource.Formats.Source.VBSP
                 if (DecalScale <= 0)
                     DecalScale = 1f;
 
+                if (DecalMaterial == null || DecalMaterial.Material == null || DecalMaterial.Material.mainTexture == null)
+                    return;
+
                 Int32 DecalWidth = DecalMaterial.Material.mainTexture.width;   //X
                 Int32 DecalHeight = DecalMaterial.Material.mainTexture.height; //Y
                 Sprite DecalTexture = Sprite.Create((Texture2D)DecalMaterial.Material.mainTexture, new Rect(0, 0, DecalWidth, DecalHeight), Vector2.zero);

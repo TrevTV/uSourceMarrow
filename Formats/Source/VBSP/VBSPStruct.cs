@@ -183,6 +183,33 @@ namespace uSource.Formats.Source.VBSP
             // index into face array
         }
 
+        /// <summary>
+        /// sizeof = 32
+        /// </summary>
+        [StructLayout(LayoutKind.Sequential, Pack = 1)]
+        public struct dleaf_t
+        {
+            public Int32  Contents;
+            public Int16  Cluster;
+            public Int16  Area; // area + flags packed into 16 bits
+            public Int16  MinX, MinY, MinZ;
+            public Int16  MaxX, MaxY, MaxZ;
+            public UInt16 FirstLeafFace;
+            public UInt16 NumLeafFaces;
+            public UInt16 FirstLeafBrush;
+            public UInt16 NumLeafBrushes;
+            public Int16  LeafWaterDataID;
+        }
+
+        /// <summary>
+        /// sizeof = 4
+        /// </summary>
+        [StructLayout(LayoutKind.Sequential, Pack = 1)]
+        public struct dleafface_t
+        {
+            public UInt16 FaceIndex;
+        }
+
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
         public struct dphysmodel_t
         {
